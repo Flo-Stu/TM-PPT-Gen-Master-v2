@@ -1,16 +1,14 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
+import os
 import io
+import time
+import threading
 import uuid
 import json
 import re
 import html
 import requests
-
 from flask import Flask, request, jsonify, send_file, url_for
 from flask_cors import CORS
-
 from pptx import Presentation
 from pptx.util import Inches
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE
@@ -21,7 +19,25 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 POTX_URL = "https://files.assistantos.de/powerpoint/DB_PPT-Template_16-9-data.potx"
-generated_files = {}
+generated_files = {}  # Speichert Dateien und deren Erstellungszeit
+TTL = 7 * 24 * 60 * 60  # Lebensdauer der Datei in Sekunden (7 Tage)
+
+def cleanup_files():
+    """Entfernt abgelaufene Dateien."""
+    while True:
+        time.sleep(60)  # Überprüfung alle 60 Sekunden
+        now = time.time()
+        expired_files = [file_id for file_id, (file_path, timestamp) in generated_files.items() if now - timestamp > TTL]
+        for file_id in expired_files:
+            try:
+                os.remove(file_path)  # Löscht die Datei
+                del generated_files[file_id]  # Entfernt Eintrag aus dem Dictionary
+                print(f"Datei {file_id} wurde gelöscht.")
+            except Exception as e:
+                print(f"Fehler beim Löschen der Datei {file_id}: {e}")
+
+# Startet den Aufräum-Thread
+threading.Thread(target=cleanup_files, daemon=True).start()
 
 def escape_text(text: str) -> str:
     """Entfernt Markdown und HTML-Artefakte."""
@@ -171,7 +187,12 @@ def generate_pptx():
         prs.save(pptx_buffer)
         pptx_buffer.seek(0)
         file_id = str(uuid.uuid4())
-        generated_files[file_id] = pptx_buffer
+        file_path = f"/tmp/{file_id}.pptx"
+        with open(file_path, 'wb') as f:
+            f.write(pptx_buffer.getvalue())
+
+        # Speichere Dateipfad und Erstellungszeit
+        generated_files[file_id] = (file_path, time.time())
         download_link = url_for('download_file', file_id=file_id, _external=True)
         return jsonify({'download_link': download_link})
 
@@ -181,8 +202,9 @@ def generate_pptx():
 @app.route('/download/<file_id>')
 def download_file(file_id):
     if file_id in generated_files:
+        file_path, _ = generated_files[file_id]
         return send_file(
-            generated_files[file_id],
+            file_path,
             mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation',
             download_name='generated_presentation.pptx',
             as_attachment=True
