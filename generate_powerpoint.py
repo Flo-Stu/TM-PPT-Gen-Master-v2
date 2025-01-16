@@ -62,9 +62,20 @@ def generate_pptx():
             slide.shapes.title.text = escape_text(title_slide_data.get('title', ''))
             slide.placeholders[1].text = escape_text(title_slide_data.get('subtitle', ''))
 
+        # Table of Contents
+        if 'table_of_contents' in slides_data:
+            toc_data = slides_data['table_of_contents']
+            slide = prs.slides.add_slide(prs.slide_layouts[1])
+            slide.shapes.title.text = escape_text(toc_data.get('title', 'Inhaltsverzeichnis'))
+            for shape in slide.shapes:
+                if shape.has_text_frame and not shape.text_frame.text.strip():
+                    text_frame = shape.text_frame
+                    text_frame.text = "\n".join(f"- {escape_text(entry)}" for entry in toc_data.get('entries', []))
+                    break
+
         # Content Slides
         for slide_data in slides_data.get('content_slides', []):
-            slide = prs.slides.add_slide(prs.slide_layouts[1])
+            slide = prs.slides.add_slide(prs.slide_layouts[3])
             
             # Haupttext in Platzhalter einfügen
             if 'body' in slide_data:
@@ -125,7 +136,7 @@ def generate_pptx():
         # Closing Slide
         if 'closing_slide' in slides_data:
             closing_slide_data = slides_data['closing_slide']
-            slide = prs.slides.add_slide(prs.slide_layouts[2])
+            slide = prs.slides.add_slide(prs.slide_layouts[4])
             slide.shapes.title.text = escape_text(closing_slide_data.get('title', ''))
             slide.placeholders[1].text = escape_text(closing_slide_data.get('body', ''))
 
