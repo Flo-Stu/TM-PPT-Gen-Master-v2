@@ -89,7 +89,7 @@ def generate_pptx():
 
         # Content Slides
         for slide_data in slides_data.get('content_slides', []):
-            slide_layout = prs.slide_layouts[2] if any(k in slide_data for k in ['chart_data', 'images', 'table_data']) else prs.slide_layouts[3]
+            slide_layout = prs.slide_layouts[3] if any(k in slide_data for k in ['chart_data', 'images', 'table_data']) else prs.slide_layouts[3]
             slide = prs.slides.add_slide(slide_layout)
             slide.shapes.title.text = escape_text(slide_data.get('title', 'Untitled Slide'))
 
