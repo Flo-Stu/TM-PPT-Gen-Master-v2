@@ -89,7 +89,7 @@ def generate_pptx():
 
         # Content Slides
         for slide_data in slides_data.get('content_slides', []):
-            slide_layout = prs.slide_layouts[3] if any(k in slide_data for k in ['chart_data', 'images', 'table_data']) else prs.slide_layouts[3]
+            slide_layout = prs.slide_layouts[3]  # Title and Content Layout
             slide = prs.slides.add_slide(slide_layout)
             slide.shapes.title.text = escape_text(slide_data.get('title', 'Untitled Slide'))
 
@@ -115,20 +115,16 @@ def generate_pptx():
                         response.raise_for_status()
                         image_stream = io.BytesIO(response.content)
 
-                        image_placeholder = None
-                        for shape in slide.placeholders:
-                            if shape.placeholder_format.type == 2:  # Bildplatzhalter
-                                image_placeholder = shape
-                                break
+                        # Neue Folie für jedes Bild erstellen
+                        image_slide_layout = prs.slide_layouts[3]
+                        image_slide = prs.slides.add_slide(image_slide_layout)
+                        image_slide.shapes.title.text = escape_text(img_data.get('title', 'Image Slide'))
 
-                        if image_placeholder:
-                            image_placeholder.insert_picture(image_stream)
-                        else:
-                            left = Inches(img_data.get('left', 1))
-                            top = Inches(img_data.get('top', 1))
-                            width = Inches(img_data.get('width', 3))
-                            height = Inches(img_data.get('height', 2))
-                            slide.shapes.add_picture(image_stream, left, top, width, height)
+                        left = Inches(img_data.get('left', 1))
+                        top = Inches(img_data.get('top', 1))
+                        width = Inches(img_data.get('width', 3))
+                        height = Inches(img_data.get('height', 2))
+                        image_slide.shapes.add_picture(image_stream, left, top, width, height)
                     except Exception as e:
                         print(f"Error adding image: {e}")
 
