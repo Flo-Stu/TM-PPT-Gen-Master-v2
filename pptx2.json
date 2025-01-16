@@ -1,0 +1,282 @@
+{
+    "id": "generate_powerpoint_presentation",
+    "code": "async function generate_powerpoint_presentation(params, userSettings) {\n    const { slides } = params;\n    const { pluginServer } = userSettings;\n\n    const flaskEndpoint = `${pluginServer}/generate_pptx`;\n\n    try {\n        const response = await fetch(flaskEndpoint, {\n            method: \"POST\",\n            headers: {\n                \"Content-Type\": \"application/json\",\n            },\n            body: JSON.stringify({ slides }),\n        });\n\n        if (!response.ok) {\n            const errorData = await response.json();\n            return {\n                error: true,\n                message: `Error generating PowerPoint: ${errorData.error}`,\n            };\n        }\n\n        const data = await response.json();\n\n        return {\n            download_link: `${data.download_link}`,\n            instruction: \"Please show the download link in your response.\"\n        };\n    } catch (error) {\n        return {\n            error: true,\n            message: `Failed to generate PowerPoint: ${error.message}`,\n        };\n    }\n}\n",
+    "uuid": "dc7b7d84-97d0-4f32-8b2e-967c401fc9f1",
+    "emoji": "🧩",
+    "title": "Powerpoint Generator",
+    "iconURL": "data:image/png;base64,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7tMVmoOy19cJmEUy5+MmAKoayeqEFn40ICBQnb35+AmAyl/ZVq7jW/lVh4BA3V/bm4+Vvy1HcVvvA6/q2Go2rS8RcByJm4+rAKj+5YHNn2t26bX3VwsIk143aHI+jn4CHHXVZyN9s0WvcdPurSbfQBSDxod+3GJzPr6OACSpp2fizZGd09J/Wrqu7zB49Ibi0NJ1w5W+5pObse7vXS9sHOi+ZHln/5qh9/bOIH/PLEdn/+1DO4pmPjlJBABwigAAjhEAwDECADhGAADHCADgGAEAHCMAgGMEAHCMAACOEQDAMQIAOEYAAMcIAOAYAQAcIwCAYwQAcIwAAI4RAMAxAgA4RgAAxwgA4BgBABwjAIBjBABwjAAAjhEAwDECADhGAIB/2Ld/FhDwOI7jX1eGG67uhrtJN9x0dd109wDubriNSVYPwM5ADBZKygNQEtkkk7IqpWRkJYtSKKX8+ZH/f2fk/Xo9iPfy6RMmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABAmABD2aGYEAKLuzIwAQNT1mREAiLo8MwIAUadmRgAgat/MCABEbZkZAYCmxz/NjABA06WZGQGApl0zMwIASU82zcwIACSdm+cEAJL+necEAIouzgsCAEFP/5kXBACCjs1LAgA9t36ZlwQAcp78P68IAOTsn9cEAGpObJjXBABizm6cNwQAWk5unLcEAEqeHtgw7xAACLm3dd4jANBx5td5nwBAxdXN8yEBgIYr276bjwgABNw88td8igDAt+32haM7fp8v6uEi7/BvfH6bfpyvwN1F3p6h6sYiTwC6Li7yBKDr5CJPALp2L/IEoOu/RZ4AdP1gB0QAws4v6gQgbMeiTgDCfn6wiBOAsuOLOAEo+9sfqE4A0k4v2gQg7Q9LYJwAtB1cpAlA2/fXFmUCEPfn/UWYANRttwSUCUDe3kWXAHBokSUAzM71rL17aY2zDOM4/EAOreIkRhdqQITsarRqEBWJO1HBiFBPJWq0iAFbDbgRN4VsFOuJKIJFi5tsRDc6IIpVESRuxI2YhagoImqbgidqrE0eNakh2DbtTDOTzPve1/UhfnAP8/4fohIAUtp6MBOTAPCvzdOZkASABRse85/AkASAIy7YPZ8JRwBYcvHLf2SCEQCW9dxT9XNgLALA/3Rc8fDkZ4czQQgAx+roH5nYeyBTfgLASnqHxl+f9qVAuQkAJ9QzODb56Z+ZkhIAajsJpn7PlI8AUMdJUP06UyoCQF3OHBybnJ7LlIQAUL/OhZPAPwbKQABYzUnwY6bQBAAnQWACgJMgMAGgQdr6hsarP2QKRQBo/Engw+LCEAAarzIwMjHlwYEiEACapL3/1vHqT5mWJgA0Ve+1ToJWJgA0X2VwdGLK3FB9BIBSWTwJ9mVqJACUUO/QI5NGBmohAJRV18JJMJs5EQGg1Nr7R3ZVZzIrEAACcBKsRACIontwbLeT4CgCQCiLU8T7M/8RAAIyRbxEAIiq2xRxzgJAaF4nEQDCM0UsAES3+DrJoYwAEJbXSQSA8JwEAkB0pogFgOhMEQsA0bX1eZ1EAAjOFLEAEN0ZpogFgODa+oZMEQsAsZkiFgCiqwyMmCIWAEIzRSwAhOckEACi6/I6iQAQnCliASA8U8QCQHRdpogFgOA6Fk6CyFPEAgCBp4gFAJZfJwk3RSwAEHiKWAAg8EkgAHBcPSFeJxEACDxFLAAQeIpYACDwFLEAQOApYgGAevWWZ4pYACDwSSAAsJqToOBTxAIAq9R24fCT7xZ0ZGBnAsK+TjKWgEapFO11km0JaKj2i+565r2CfFG0JQFhp4gvTUCzVFp8inj+tAQ0VcfmkWc/+Dm3oi8TcETAKeJXErAWll8nmc0t444ErK3Oy+597sNfcguYOysBR4tyEryVgPXTvb6vk9ycgHW2YeC+5z/6Na+979sTUKuyTRFvT0A9yjRF/E1nAlrNxsvvf2Hqt9x0tyegRTV9iviNBLS0xZPgUG6GmXMS0PpOv3L0xY8P5sY6fH0CCqPBJ8GOBBTMeTc8+uoX83n1Hk9AITXgdZJdCSiwtk1bn3hnXz4lcw8moPhOaYp45roElEXl6h0vfTKba/XmuQkol/b+O5/auz+f1Le3JKCczr9p52tf/Z1X9N12//+Hcuu65qE9x/ui6K+3t/j+F0LouOTup98/kJfMf75nuCcBkZx91W3bHhgdvnHTxgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0z9HSmWOWyIkCQAAAABJRU5ErkJggg==",
+    "httpAction": {
+        "id": "1aabf70a-37ca-4f7f-9ab2-6c0382f83d03",
+        "url": "{pluginServer}/generate_pptx",
+        "name": "Generate PowerPoint Presentation",
+        "method": "POST",
+        "hasBody": true,
+        "hasHeaders": true,
+        "requestBody": "{\n   \"slides\": {slides}\n}\n",
+        "requestHeaders": "{\n  \"Content-Type\": \"application/json\"\n}",
+        "resultTransform": {
+            "engine": "handlebars",
+            "expression": ""
+        },
+        "requestBodyFormat": "json",
+        "hasResultTransform": false
+    },
+    "openaiSpec": {
+        "name": "generate_powerpoint_presentation",
+        "parameters": {
+            "type": "object",
+            "required": [
+                "slides"
+            ],
+            "properties": {
+                "slides": {
+                    "type": "object",
+                    "properties": {
+                        "title_slide": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string",
+                                    "description": "Title of the title slide. Do not use Markdown format."
+                                },
+                                "subtitle": {
+                                    "type": "string",
+                                    "description": "Subtitle of the title slide. Do not use Markdown format."
+                                },
+                                "title_font_size": {
+                                    "type": "number",
+                                    "default": 54,
+                                    "description": "Font size for the title slide title (default: 54)"
+                                },
+                                "subtitle_font_size": {
+                                    "type": "number",
+                                    "default": 32,
+                                    "description": "Font size for the title slide subtitle (default: 32)"
+                                }
+                            },
+                            "description": "Title slide settings"
+                        },
+                        "content_slides": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "body": {
+                                        "type": "string",
+                                        "description": "Main text content of the slide. Do not use Markdown format."
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "description": "Title of the slide. Do not use Markdown format."
+                                    },
+                                    "images": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "required": [
+                                                "url"
+                                            ],
+                                            "properties": {
+                                                "top": {
+                                                    "type": "number",
+                                                    "default": 1,
+                                                    "description": "Position from top in inches (default: 1)"
+                                                },
+                                                "url": {
+                                                    "type": "string",
+                                                    "description": "URL of the image (required)"
+                                                },
+                                                "left": {
+                                                    "type": "number",
+                                                    "default": 1,
+                                                    "description": "Position from left in inches (default: 1)"
+                                                },
+                                                "width": {
+                                                    "type": "number",
+                                                    "default": 3,
+                                                    "description": "Width of image in inches (default: 3)"
+                                                },
+                                                "height": {
+                                                    "type": "number",
+                                                    "default": 2,
+                                                    "description": "Height of image in inches (default: 2)"
+                                                }
+                                            }
+                                        },
+                                        "description": "Images to be added to the slide"
+                                    },
+                                    "chart_data": {
+                                        "type": "object",
+                                        "required": [
+                                            "type",
+                                            "categories",
+                                            "series"
+                                        ],
+                                        "properties": {
+                                            "type": {
+                                                "enum": [
+                                                    "COLUMN_CLUSTERED",
+                                                    "LINE",
+                                                    "PIE",
+                                                    "BAR_CLUSTERED",
+                                                    "AREA",
+                                                    "RADAR"
+                                                ],
+                                                "type": "string",
+                                                "default": "COLUMN_CLUSTERED",
+                                                "description": "Type of chart (matches XL_CHART_TYPE enum)"
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "default": "",
+                                                "description": "Title of the chart (optional). Do not use Markdown format."
+                                            },
+                                            "series": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "name",
+                                                        "values"
+                                                    ],
+                                                    "properties": {
+                                                        "name": {
+                                                            "type": "string",
+                                                            "default": "",
+                                                            "description": "Name of the data series. Do not use Markdown format."
+                                                        },
+                                                        "values": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "type": "number"
+                                                            },
+                                                            "default": [],
+                                                            "description": "Values for the data series"
+                                                        }
+                                                    }
+                                                },
+                                                "default": [],
+                                                "description": "Data series for the chart"
+                                            },
+                                            "categories": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                },
+                                                "default": [],
+                                                "description": "Labels for data points. Do not use Markdown format."
+                                            },
+                                            "has_legend": {
+                                                "type": "boolean",
+                                                "default": true,
+                                                "description": "Whether to show the chart legend"
+                                            },
+                                            "chart_position": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "top": {
+                                                        "type": "number",
+                                                        "default": 3,
+                                                        "description": "Position from top in inches (default: 3)"
+                                                    },
+                                                    "left": {
+                                                        "type": "number",
+                                                        "default": 1,
+                                                        "description": "Position from left in inches (default: 1)"
+                                                    },
+                                                    "width": {
+                                                        "type": "number",
+                                                        "default": 6,
+                                                        "description": "Width of the chart in inches (default: 6)"
+                                                    },
+                                                    "height": {
+                                                        "type": "number",
+                                                        "default": 4,
+                                                        "description": "Height of the chart in inches (default: 4)"
+                                                    }
+                                                },
+                                                "description": "Position and size of the chart on the slide"
+                                            },
+                                            "title_font_size": {
+                                                "type": "number",
+                                                "default": 18,
+                                                "description": "Font size for the chart title (default: 18 points)"
+                                            }
+                                        },
+                                        "description": "Data for creating a chart in the slide"
+                                    },
+                                    "table_data": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        },
+                                        "description": "2D array representing table data. First row can be headers. Do not use Markdown format."
+                                    },
+                                    "body_font_size": {
+                                        "type": "number",
+                                        "default": 24,
+                                        "description": "Font size for the slide body text (default: 24 points)"
+                                    },
+                                    "table_position": {
+                                        "type": "object",
+                                        "properties": {
+                                            "top": {
+                                                "type": "number",
+                                                "default": 3,
+                                                "description": "Position from top in inches (default: 3)"
+                                            },
+                                            "left": {
+                                                "type": "number",
+                                                "default": 1,
+                                                "description": "Position from left in inches (default: 1)"
+                                            },
+                                            "width": {
+                                                "type": "number",
+                                                "default": 8,
+                                                "description": "Width of the table in inches (default: 8)"
+                                            },
+                                            "height": {
+                                                "type": "number",
+                                                "default": 2,
+                                                "description": "Height of the table in inches (default: 2)"
+                                            }
+                                        },
+                                        "description": "Position and size of the table on the slide"
+                                    },
+                                    "title_font_size": {
+                                        "type": "number",
+                                        "default": 36,
+                                        "description": "Font size for the slide title (default: 36 points)"
+                                    }
+                                }
+                            },
+                            "description": "Array of content slides for the presentation"
+                        }
+                    },
+                    "description": "Presentation slides data including title slide and content slides"
+                }
+            }
+        },
+        "description": "generate a PowerPoint presentation file (*.pptx) about the provided topic, then create a download link and provide it to the user in the response."
+    },
+    "outputType": "respond_to_ai",
+    "oauthConfig": null,
+    "userSettings": [
+        {
+            "name": "pluginServer",
+            "label": "Plugin Server",
+            "required": true,
+            "description": "The URL of the plugin server",
+            "placeholder": "https://..."
+        }
+    ],
+    "overviewMarkdown": "## Powerpoint Generator\n\nThis plugin lets you effortlessly create PowerPoint presentations directly with AI! 🚀 Simply provide a topic, and it generates a downloadable .pptx file. ✨\n",
+    "authenticationType": "AUTH_TYPE_NONE",
+    "implementationType": "http"
+}
