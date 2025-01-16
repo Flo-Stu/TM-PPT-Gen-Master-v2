@@ -95,16 +95,13 @@ def generate_pptx():
 
             # Body Text
             if 'body' in slide_data:
-                body_placeholder = None
                 for shape in slide.placeholders:
-                    if shape.has_text_frame and not shape.text_frame.text.strip():
-                        body_placeholder = shape
+                    if shape.placeholder_format.idx == 1:  # Standard-Body-Platzhalter
+                        text_frame = shape.text_frame
+                        text_frame.text = escape_text(slide_data['body'])
+                        text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+                        text_frame.vertical_anchor = MSO_ANCHOR.TOP
                         break
-                if body_placeholder:
-                    text_frame = body_placeholder.text_frame
-                    text_frame.text = escape_text(slide_data['body'])
-                    text_frame.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
-                    text_frame.vertical_anchor = MSO_ANCHOR.TOP
 
             # Bilder
             if 'images' in slide_data:
@@ -115,16 +112,10 @@ def generate_pptx():
                         response.raise_for_status()
                         image_stream = io.BytesIO(response.content)
 
-                        # Neue Folie für jedes Bild erstellen
-                        image_slide_layout = prs.slide_layouts[3]
-                        image_slide = prs.slides.add_slide(image_slide_layout)
-                        image_slide.shapes.title.text = escape_text(img_data.get('title', 'Image Slide'))
-
-                        left = Inches(img_data.get('left', 1))
-                        top = Inches(img_data.get('top', 1))
-                        width = Inches(img_data.get('width', 3))
-                        height = Inches(img_data.get('height', 2))
-                        image_slide.shapes.add_picture(image_stream, left, top, width, height)
+                        for shape in slide.placeholders:
+                            if shape.placeholder_format.idx == 2:  # Bild-Platzhalter
+                                shape.insert_picture(image_stream)
+                                break
                     except Exception as e:
                         print(f"Error adding image: {e}")
 
@@ -134,27 +125,14 @@ def generate_pptx():
                 rows = len(table_data)
                 cols = len(table_data[0]) if table_data else 0
 
-                table_placeholder = None
                 for shape in slide.placeholders:
-                    if shape.placeholder_format.type == 3:  # Tabellenplatzhalter
-                        table_placeholder = shape
+                    if shape.placeholder_format.idx == 3:  # Tabellen-Platzhalter
+                        table = shape.insert_table(rows, cols).table
+                        for row_idx, row_data in enumerate(table_data):
+                            for col_idx, cell_data in enumerate(row_data):
+                                cell = table.cell(row_idx, col_idx)
+                                cell.text = str(cell_data)
                         break
-
-                if table_placeholder:
-                    table = table_placeholder.insert_table(rows, cols).table
-                else:
-                    table_position = slide_data.get('table_position', {})
-                    left = Inches(table_position.get('left', 1))
-                    top = Inches(table_position.get('top', 3))
-                    width = Inches(table_position.get('width', 8))
-                    height = Inches(table_position.get('height', 2))
-                    table_shape = slide.shapes.add_table(rows, cols, left, top, width, height)
-                    table = table_shape.table
-
-                for row_idx, row_data in enumerate(table_data):
-                    for col_idx, cell_data in enumerate(row_data):
-                        cell = table.cell(row_idx, col_idx)
-                        cell.text = str(cell_data)
 
             # Diagramme
             if 'chart_data' in slide_data:
@@ -165,26 +143,14 @@ def generate_pptx():
                     for series in chart_data_input.get('series', []):
                         chart_data_obj.add_series(series.get('name', ''), series.get('values', []))
 
-                    chart_placeholder = None
                     for shape in slide.placeholders:
-                        if shape.placeholder_format.type == 4:  # Diagrammplatzhalter
-                            chart_placeholder = shape
+                        if shape.placeholder_format.idx == 4:  # Diagramm-Platzhalter
+                            chart = shape.insert_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, chart_data_obj).chart
+                            chart.has_legend = chart_data_input.get('has_legend', True)
+                            if chart_data_input.get('title'):
+                                chart.chart_title.has_text_frame = True
+                                chart.chart_title.text_frame.text = chart_data_input['title']
                             break
-
-                    if chart_placeholder:
-                        chart = chart_placeholder.insert_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, chart_data_obj).chart
-                    else:
-                        chart_position = chart_data_input.get('chart_position', {})
-                        x = Inches(chart_position.get('left', 1))
-                        y = Inches(chart_position.get('top', 3))
-                        cx = Inches(chart_position.get('width', 6))
-                        cy = Inches(chart_position.get('height', 4))
-                        chart = slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, x, y, cx, cy, chart_data_obj).chart
-
-                    chart.has_legend = chart_data_input.get('has_legend', True)
-                    if chart_data_input.get('title'):
-                        chart.chart_title.has_text_frame = True
-                        chart.chart_title.text_frame.text = chart_data_input['title']
                 except Exception as e:
                     print(f"Error adding chart: {e}")
 
