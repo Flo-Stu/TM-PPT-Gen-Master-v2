@@ -75,17 +75,17 @@ def generate_pptx():
             subtitle_placeholder = title_slide.placeholders[1]
             subtitle_placeholder.text = escape_text(title_slide_data.get('subtitle', ''))
 
-# Table of Contents
-if 'table_of_contents' in slides_data:
-    toc_data = slides_data['table_of_contents']
-    toc_slide_layout = prs.slide_layouts[1]
-    toc_slide = prs.slides.add_slide(toc_slide_layout)
-    toc_slide.shapes.title.text = escape_text(toc_data.get('title', 'Inhaltsverzeichnis'))
-    for shape in toc_slide.shapes:
-        if shape.has_text_frame and not shape.text_frame.text.strip():
-            text_frame = shape.text_frame
-            text_frame.text = "\n".join(f"{escape_text(entry)}" for entry in toc_data.get('entries', []))
-            break
+        # Table of Contents
+        if 'table_of_contents' in slides_data:
+            toc_data = slides_data['table_of_contents']
+            toc_slide_layout = prs.slide_layouts[1]
+            toc_slide = prs.slides.add_slide(toc_slide_layout)
+            toc_slide.shapes.title.text = escape_text(toc_data.get('title', 'Inhaltsverzeichnis'))
+            for shape in toc_slide.shapes:
+                if shape.has_text_frame and not shape.text_frame.text.strip():
+                    text_frame = shape.text_frame
+                    text_frame.text = "\n".join(f"{escape_text(entry)}" for entry in toc_data.get('entries', []))
+                    break
 
         # Content Slides
         for slide_data in slides_data.get('content_slides', []):
